@@ -1,7 +1,8 @@
 extends Sprite
 
-
 class_name WYSAR
+
+var wc = preload("res://WYSAR_Character.gd")
 
 var current_file: File = File.new()
 var current_file_text: String = ""
@@ -26,12 +27,29 @@ var vis_name: bool = true
 var wait_enter: bool = false
 var clear_text: bool = false
 
-func _init(stf, tex, bgs, fnts):
+var text_list: PoolStringArray = []
+var bg_list: PoolStringArray = []
+var fonts_list: PoolStringArray = []
+var sound_list: PoolStringArray = []
+var music_list: PoolStringArray = []
+var character_list: = []
+
+func _init(stf: String, tex: PoolStringArray, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha):
+	self.text_list = tex
+	self.bg_list = bgs
+	self.fonts_list = fnts
+	self.sound_list = sn
+	self.music_list = ms
+	self.character_list = cha
+	print(position)
+	for i in self.character_list:
+		self.add_child(i)
 	self.text_fnt.font_data = load("res://fonts/0.ttf")
 	self.text_fnt.size = 24
 	self.bg.texture = load("res://bgs/bg.png")
 	self.bg.centered = false
 	open_file(stf)
+	
 	print("Constructed!")
 
 
@@ -40,6 +58,9 @@ func read_file():
 	self.current_pos_in_file += 1
 	return ch
 
+func command_section():
+	pass
+	
 func delay(t: float):
 	var time = OS.get_ticks_msec()
 	while OS.get_ticks_msec() - time < t:
@@ -52,29 +73,35 @@ func open_file(nf):
 
 var time = 0.0
 
-func _process(delta):
-	delay(delay_text)
-	if wait_enter:
-		if Input.is_key_pressed(KEY_ENTER):
-			wait_enter = false
+func _input(event):
+	if event is InputEventKey and event.scancode == KEY_ENTER:
+		wait_enter = false
 		if clear_text:
 			text_str = ""
+			
+func _process(delta):
+	var dt = delay_text
+	if Input.is_key_pressed(KEY_SPACE):
+		dt /= 2
+	delay(dt)
+	if wait_enter:		
 		return
 	var symb = self.read_file()
 	
 	if symb == ';':
-		wait_enter = true
-		clear_text = true
+		self.wait_enter = true
+		self.clear_text = true
 	elif symb == '$':
-		wait_enter = true
+		self.wait_enter = true
 	elif symb == '~':
-		pass
+		delay(dt)
 	elif symb == '^':
-		pass
+		self.text_str = ""
 	elif symb == '\\':
-		pass
+		symb = self.read_file()
+		self.text_str += symb
 	elif symb == '|':
-		pass
+		command_section() # TODO
 	else:
 		self.text_str += symb
 	

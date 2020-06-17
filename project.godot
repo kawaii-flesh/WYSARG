@@ -13,9 +13,15 @@ _global_script_classes=[ {
 "class": "WYSAR",
 "language": "GDScript",
 "path": "res://WYSAR.gd"
+}, {
+"base": "Sprite",
+"class": "WYSAR_Character",
+"language": "GDScript",
+"path": "res://WYSAR_Character.gd"
 } ]
 _global_script_class_icons={
-"WYSAR": ""
+"WYSAR": "",
+"WYSAR_Character": ""
 }
 
 [application]
