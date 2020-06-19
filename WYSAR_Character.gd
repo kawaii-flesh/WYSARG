@@ -4,13 +4,12 @@ class_name WYSAR_Character
 
 var character: Sprite = Sprite.new()
 var texture_list: PoolStringArray = []
-var pos: Vector2 = Vector2.ZERO
+var pos: Vector2
+var vis: bool = false
+
+var c_add: bool = false
+var c_delete: bool = false
+var c_mod: Color = Color(1, 1, 1, 0)
 
 func _init(tl: PoolStringArray):
-	self.texture_list = tl	
-
-func _ready():
-	pass # Replace with function body.
-	
-func _draw():
-	draw_texture(self.character.texture, self.pos)
+	self.texture_list = tl

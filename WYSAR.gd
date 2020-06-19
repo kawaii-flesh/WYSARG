@@ -75,11 +75,12 @@ func open_file(nf):
 var time = 0.0
 
 func _input(event):
-	if Input.is_key_pressed(KEY_ENTER):
-		wait_enter = false
-		if clear_text:
-			text_str = ""
-		
+	if wait_enter:
+		if Input.is_key_pressed(KEY_ENTER):
+			wait_enter = false
+			if clear_text:
+				text_str = ""
+
 func _process(delta):
 	if bg_b or bg_l:
 		update()
@@ -88,10 +89,13 @@ func _process(delta):
 	if Input.is_key_pressed(KEY_SPACE) and not Input.is_key_pressed(KEY_ENTER):
 		dt /= 3
 	delay(dt)
-	if wait_enter:		
+	if wait_enter:
+		update()
 		return	
 	var symb = self.read_file()
-	if symb == '': return
+	if symb == '': 
+		update()
+		return
 	
 	if symb == ';':
 		self.wait_enter = true
@@ -133,6 +137,29 @@ func draw_text():
 func draw_name():	
 	draw_string(self.name_fnt, self.name_pos, self.name_str, self.name_clr)
 	
+func draw_characters():
+	for i in character_list:
+		if i.vis:
+			if i.c_add:
+				if i.c_mod.a < 1:
+					i.c_mod.a += 0.1
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+				else:
+					i.c_add = false
+					i.c_mod = Color(1, 1, 1, 1)
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+			elif i.c_delete:
+				if i.c_mod.a > 0:
+					i.c_mod.a -= 0.1
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+				else:
+					i.c_delete = false
+					i.vis = false
+					i.c_mod = Color(1, 1, 1, 0)
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+			else:
+				draw_texture(i.character.get_texture(), i.pos, self.bgm)
+			
 func _draw():
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
 		self.bg.set_texture(load(bg_list[bgid]))
@@ -140,25 +167,28 @@ func _draw():
 	if bg_b:
 		delay(bgsp)
 		if self.bgm.r > 0:
-			self.bgm.r -= 0.05
-			self.bgm.g -= 0.05
-			self.bgm.b -= 0.05
+			self.bgm.r -= 0.01
+			self.bgm.g -= 0.01
+			self.bgm.b -= 0.01
 		else:
 			self.bg_b = false
 			self.bgm = Color(0, 0, 0, 1)
-		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)	
+		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+		draw_characters()
 	elif self.bg_l:
 		delay(self.bgsp)
 		if self.bgm.r < 1.0:
-			self.bgm.r += 0.05
-			self.bgm.g += 0.05
-			self.bgm.b += 0.05
+			self.bgm.r += 0.01
+			self.bgm.g += 0.01
+			self.bgm.b += 0.01
 		else:
 			self.bg_l = false
 			self.bgm = Color(1, 1, 1, 1)
 		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+		draw_characters()
 	else:
 		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+		draw_characters()
 	if not self.bg_b and not self.bg_l:
 		draw_text()
 		draw_name()
@@ -333,5 +363,49 @@ func command_section():
 			self.bg_c = true
 			self.bgsp = float(sp)
 			self.bgid = int(bgid)
+	elif com_id == "2":
+		com_id = ""
+		ch = self.read_file()
+		while ch != '|':
+			com_id += ch
+			ch = self.read_file()
+		if com_id == "0":
+			var cid = ""
+			var tid = ""
+			var xp = ""
+			var yp = ""
+			ch = self.read_file()
+			while ch != ',':
+				cid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				tid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				xp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != '|':
+				yp += ch
+				ch = self.read_file()
+			self.character_list[int(cid)].character.set_texture(load(self.character_list[int(cid)].texture_list[int(tid)]))
+			self.character_list[int(cid)].pos = Vector2(int(xp), int(yp))
+			self.character_list[int(cid)].vis = true
+			self.character_list[int(cid)].c_add = true
+		elif com_id == "1":
+			var cid = ""
+			ch = self.read_file()
+			while ch != '|':
+				cid += ch
+				ch = self.read_file()
+			print(cid)
+			if cid == "-1":
+				for i in self.character_list:
+					i.c_delete = true
+			else:
+				self.character_list[int(cid)].c_delete = true
+				
 	if current_file_text[current_pos_in_file] == '\n':
 		current_pos_in_file += 1
