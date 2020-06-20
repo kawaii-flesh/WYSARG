@@ -8,7 +8,7 @@ var bgs = ["res://bgs/bg.png", "res://bgs/bg1.jpg"]
 var fonts = ["res://fonts/0.ttf"]
 var sn = ["res://fonts/0.ttf"]
 var ms = ["res://fonts/0.ttf"]
-var ch = [WYSAR_Character.new(["res://MCH/1.png"])]
+var ch = [WYSAR_Character.new(["res://MCH/1.png", "res://MCH/2.png"])]
 
 var wysar = WYSAR.new("res://texts/0.tres", tex, bgs, fonts, sn, ms, ch)
 

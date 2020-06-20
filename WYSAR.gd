@@ -138,24 +138,31 @@ func draw_name():
 	draw_string(self.name_fnt, self.name_pos, self.name_str, self.name_clr)
 	
 func draw_characters():
-	for i in character_list:
-		if i.vis:
-			if i.c_add:
-				if i.c_mod.a < 1:
-					i.c_mod.a += 0.1
-					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
-				else:
-					i.c_add = false
-					i.c_mod = Color(1, 1, 1, 1)
-					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
-			elif i.c_delete:
+	for i in character_list:		
+		if i.vis or i.c_ch:
+			if i.c_delete:
 				if i.c_mod.a > 0:
 					i.c_mod.a -= 0.1
+					if i.c_mod.a < 0:
+						i.c_mod = Color(1, 1, 1, 0)
 					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
 				else:
 					i.c_delete = false
 					i.vis = false
-					i.c_mod = Color(1, 1, 1, 0)
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+					if i.c_ch:
+						i.character.set_texture(load(i.texture_list[i.c_nt]))
+						i.c_ch = false
+						i.c_add = true
+						i.vis = true
+			elif i.c_add:
+				if i.c_mod.a < 1:
+					i.c_mod.a += 0.1
+					if(i.c_mod.a > 1):
+						i.c_mod = Color(1, 1, 1, 1)
+					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
+				else:
+					i.c_add = false
 					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
 			else:
 				draw_texture(i.character.get_texture(), i.pos, self.bgm)
@@ -213,6 +220,7 @@ func command_section():
 			while ch != ',':
 				x += ch
 				ch = self.read_file()
+			ch = self.read_file()
 			while ch != '|':
 				y += ch
 				ch = self.read_file()
@@ -225,6 +233,7 @@ func command_section():
 			while ch != ',':
 				x += ch
 				ch = self.read_file()
+			ch = self.read_file()
 			while ch != '|':
 				y += ch
 				ch = self.read_file()
@@ -251,6 +260,7 @@ func command_section():
 			while ch != ',':
 				f_id += ch
 				ch = self.read_file()
+			ch = self.read_file()
 			while ch != '|':
 				f_s += ch
 				ch = self.read_file()
@@ -263,6 +273,7 @@ func command_section():
 			while ch != ',':
 				f_id += ch
 				ch = self.read_file()
+			ch = self.read_file()
 			while ch != '|':
 				f_s += ch
 				ch = self.read_file()
@@ -355,6 +366,7 @@ func command_section():
 			while ch != ',':
 				sp += ch
 				ch = self.read_file()
+			ch = self.read_file()
 			while ch != '|':
 				bid += ch
 				ch = self.read_file()
@@ -400,12 +412,37 @@ func command_section():
 			while ch != '|':
 				cid += ch
 				ch = self.read_file()
-			print(cid)
 			if cid == "-1":
 				for i in self.character_list:
 					i.c_delete = true
 			else:
 				self.character_list[int(cid)].c_delete = true
-				
+		elif com_id == "2":
+			var cid = ""
+			ch = self.read_file()
+			while ch != '|':
+				cid += ch
+				ch = self.read_file()
+			if cid == "-1":
+				for i in self.character_list:
+					i.c_add = true
+					i.vis = true
+			else:
+				self.character_list[int(cid)].c_add = true
+				self.character_list[int(cid)].vis = true
+		elif com_id == "3":
+			var cid = ""
+			var tid = ""
+			ch = self.read_file()
+			while ch != ',':
+				cid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != '|':
+				tid += ch
+				ch = self.read_file()
+			self.character_list[int(cid)].c_delete = true
+			self.character_list[int(cid)].c_ch = true
+			self.character_list[int(cid)].c_nt = int(tid)
 	if current_file_text[current_pos_in_file] == '\n':
 		current_pos_in_file += 1
