@@ -33,6 +33,7 @@ var fonts_list: PoolStringArray = []
 var sound_list: PoolStringArray = []
 var music_list: PoolStringArray = []
 var character_list: = []
+var vars: PoolStringArray = []
 
 var bg_b: bool = false
 var bg_l: bool = false
@@ -41,8 +42,16 @@ var bgsp: float = 0.0
 var bgid: int = 0
 var bgm: Color = Color(1.0, 1.0, 1.0, 1.0)
 
-func _init(stf: String, tex: PoolStringArray, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha):
-	self.text_list = tex
+var sh_c: bool = false
+var ch_t: PoolStringArray = []
+var ch_dt: PoolStringArray = []
+var ch_rt: PoolStringArray = []
+var ch_p: Vector2 = Vector2.ZERO
+var ch_cur: int = 0
+var ch_mkd: bool = false
+var ch_prsd: bool = false
+
+func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha, vb: PoolStringArray):
 	self.bg_list = bgs
 	self.fonts_list = fnts
 	self.sound_list = sn
@@ -51,9 +60,8 @@ func _init(stf: String, tex: PoolStringArray, bgs: PoolStringArray, fnts: PoolSt
 	for i in self.character_list:
 		self.add_child(i)
 	self.bg.centered = false
+	self.vars = vb
 	open_file(stf)	
-	
-	print("Constructed!")
 
 func read_file():
 	if current_pos_in_file >= current_file_text.length():
@@ -71,6 +79,7 @@ func open_file(nf):
 	current_file.close()
 	current_file.open(nf, File.READ)
 	current_file_text = current_file.get_as_text()
+	current_pos_in_file = 0
 
 var time = 0.0
 
@@ -81,7 +90,40 @@ func _input(event):
 			if clear_text:
 				text_str = ""
 
+var fr = 0
+var cfr = 4
+var fir_s = true
+var fir_c = false
+func draw_wait_symbol():
+	if fr < cfr and fir_s:
+		self.text_str += '_'
+		fir_s = false
+		fir_c = true
+	elif fr > cfr and fir_c:
+		self.text_str = self.text_str.substr(0, len(self.text_str)-1)
+		fir_c = false
+		fir_s = true
+	fr += 1
+	if fr == cfr*2:
+		fr = 0
+		
+func choice_action(ch):
+	open_file(ch)
+	
 func _process(delta):
+	if self.sh_c and self.ch_mkd == false:
+		make_choice()
+		update()
+		return
+	if self.ch_mkd:
+		choice_action(self.ch_rt[self.ch_cur])
+		self.ch_mkd = false
+		self.sh_c = false
+		
+	for i in character_list:
+		if i.c_add or i.c_delete:
+			update()
+			return
 	if bg_b or bg_l:
 		update()
 		return
@@ -91,7 +133,7 @@ func _process(delta):
 	delay(dt)
 	if wait_enter:
 		update()
-		return	
+		return
 	var symb = self.read_file()
 	if symb == '': 
 		update()
@@ -136,13 +178,42 @@ func draw_text():
 
 func draw_name():	
 	draw_string(self.name_fnt, self.name_pos, self.name_str, self.name_clr)
-	
+
+func draw_choice():
+	var pos = self.ch_p
+	var cnt = 0
+	for i in self.ch_t:
+		if self.ch_cur == cnt:
+			i = '>' + i 
+		draw_string(self.text_fnt, pos, i, self.text_clr)
+		pos.y += self.text_csv
+		cnt += 1
+
+func make_choice():
+	if self.ch_mkd == false:
+		if Input.is_key_pressed(KEY_UP) and self.ch_prsd == false:
+			if self.ch_cur == 0:
+				self.ch_cur = len(self.ch_rt) - 1
+			else:
+				self.ch_cur -= 1
+			self.ch_prsd = true
+		elif Input.is_key_pressed(KEY_DOWN) and self.ch_prsd == false:
+			if self.ch_cur == len(self.ch_rt) - 1:
+				self.ch_cur = 0
+			else:
+				self.ch_cur += 1
+			self.ch_prsd = true
+		elif Input.is_key_pressed(KEY_ENTER):
+			self.ch_mkd = true
+		elif Input.is_key_pressed(KEY_UP) == false and Input.is_key_pressed(KEY_DOWN) == false:			
+			self.ch_prsd = false
+			
 func draw_characters():
-	for i in character_list:		
+	for i in character_list:
 		if i.vis or i.c_ch:
 			if i.c_delete:
 				if i.c_mod.a > 0:
-					i.c_mod.a -= 0.1
+					i.c_mod.a -= 0.05
 					if i.c_mod.a < 0:
 						i.c_mod = Color(1, 1, 1, 0)
 					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
@@ -157,7 +228,7 @@ func draw_characters():
 						i.vis = true
 			elif i.c_add:
 				if i.c_mod.a < 1:
-					i.c_mod.a += 0.1
+					i.c_mod.a += 0.05
 					if(i.c_mod.a > 1):
 						i.c_mod = Color(1, 1, 1, 1)
 					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
@@ -167,7 +238,7 @@ func draw_characters():
 			else:
 				draw_texture(i.character.get_texture(), i.pos, self.bgm)
 			
-func _draw():
+func _draw():	
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
 		self.bg.set_texture(load(bg_list[bgid]))
 		self.bg_c = false
@@ -197,8 +268,12 @@ func _draw():
 		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
 		draw_characters()
 	if not self.bg_b and not self.bg_l:
+		if self.wait_enter:
+			draw_wait_symbol()
 		draw_text()
 		draw_name()
+		if self.sh_c:
+			draw_choice()
 
 func command_section():	
 	var ch = self.read_file()
@@ -444,5 +519,64 @@ func command_section():
 			self.character_list[int(cid)].c_delete = true
 			self.character_list[int(cid)].c_ch = true
 			self.character_list[int(cid)].c_nt = int(tid)
+	elif com_id == "3":
+		com_id = ""
+		ch = self.read_file()
+		while ch != '|':
+			com_id += ch
+			ch = self.read_file()
+		if com_id == "0":
+			var noc = ""
+			var xp = ""
+			var yp = ""
+			var tx = []
+			var rt = []
+			ch = self.read_file()
+			while ch != ',':
+				noc += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				xp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				yp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			for i in range(0, int(noc)):
+				var t = ""
+				while ch != ';':
+					t += ch
+					ch = self.read_file()
+				ch = self.read_file()
+				tx += [t]
+			for i in range(0, int(noc)):
+				var n = ""
+				while ch != ',' and ch != '|':
+					n += ch
+					ch = self.read_file()
+				ch = self.read_file()
+				rt += [n]
+			self.ch_cur = 0
+			self.ch_mkd = false
+			self.ch_p = Vector2(int(xp), int(yp))
+			self.ch_t = tx
+			self.ch_rt = rt
+			self.sh_c = true
+	elif com_id == "t":
+		var tid = ""
+		ch = self.read_file()
+		while ch != '|':
+			tid += ch
+			ch = self.read_file()
+		self.current_file_text = self.current_file_text.insert(self.current_pos_in_file, self.vars[int(tid)])
+	elif com_id == "n":
+		var tid = ""
+		ch = self.read_file()
+		while ch != '|':
+			tid += ch
+			ch = self.read_file()
+		self.name_str = self.vars[int(tid)] 
 	if current_file_text[current_pos_in_file] == '\n':
 		current_pos_in_file += 1
