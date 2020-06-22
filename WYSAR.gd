@@ -8,7 +8,6 @@ var current_file: File = File.new()
 var current_file_text: String = ""
 var current_pos_in_file: int = 0
 
-var bg: Sprite = Sprite.new()
 var text_str: String
 var name_str: String
 var text_fnt: DynamicFont = DynamicFont.new()
@@ -51,6 +50,19 @@ var ch_cur: int = 0
 var ch_mkd: bool = false
 var ch_prsd: bool = false
 
+var sound: AudioStreamPlayer = AudioStreamPlayer.new()
+var sound_lp: bool = false
+var sound_dl = 0
+var sound_stp: bool = false
+var sound_str: bool = false 
+var sound_vl: float = 0.0
+var music: AudioStreamPlayer = AudioStreamPlayer.new()
+var music_lp: bool = false
+var music_dl = 0
+var music_stp = false
+var music_str: bool = false 
+var music_vl: float = 0.0
+
 func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha, vb: PoolStringArray):
 	self.bg_list = bgs
 	self.fonts_list = fnts
@@ -59,7 +71,11 @@ func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStr
 	self.character_list = cha
 	for i in self.character_list:
 		self.add_child(i)
-	self.bg.centered = false
+	self.add_child(sound)
+	sound.connect("finished", self, "sound_loop")
+	self.add_child(music)
+	music.connect("finished", self, "music_loop")
+	self.centered = false
 	self.vars = vb
 	open_file(stf)	
 
@@ -83,12 +99,21 @@ func open_file(nf):
 
 var time = 0.0
 
+var key_enter_prs = false
+var key_enter_rel = true
 func _input(event):
 	if wait_enter:
 		if Input.is_key_pressed(KEY_ENTER):
+			key_enter_prs = true
+			key_enter_rel = false
+		else:
+			key_enter_rel = true
+		if key_enter_prs and key_enter_rel:
 			wait_enter = false
 			if clear_text:
 				text_str = ""
+			key_enter_prs = false
+			key_enter_rel = false
 
 var fr = 0
 var cfr = 4
@@ -111,6 +136,38 @@ func choice_action(ch):
 	open_file(ch)
 	
 func _process(delta):
+	if self.sound_stp and not self.sound_str:
+		delay(sound_dl)
+		if self.sound.get_volume_db() >= -60:
+			self.sound.volume_db -= 2
+		else:
+			self.sound_stp = false
+			self.sound_lp = false
+			self.sound.stop()
+	elif self.sound_str and not self.sound_stp:
+		delay(sound_dl)
+		if self.sound.get_volume_db() + 2 < self.sound_vl:
+			self.sound.volume_db += 2
+		else:
+			self.sound_str = false
+			self.sound.set_volume_db(self.sound_vl)
+			
+	if self.music_stp and not self.music_str:
+		delay(music_dl)
+		if self.music.get_volume_db() >= -60:
+			self.music.volume_db -= 2
+		else:
+			self.music_stp = false
+			self.music_lp = false
+			self.music.stop()
+	elif self.music_str and not self.music_stp:
+		delay(music_dl)
+		if self.music.get_volume_db() + 2 < self.music_vl:
+			self.music.volume_db += 2
+		else:
+			self.music_str = false
+			self.music.set_volume_db(self.sound_vl)
+			
 	if self.sh_c and self.ch_mkd == false:
 		make_choice()
 		update()
@@ -166,6 +223,14 @@ func _process(delta):
 	
 	update()
 
+func sound_loop():
+	if self.sound_lp:
+		self.sound.play()
+
+func music_loop():
+	if self.music_lp:
+		self.music.play()
+
 func draw_text():
 	var pos = self.text_pos
 	for i in self.text_str:
@@ -209,6 +274,8 @@ func make_choice():
 			self.ch_prsd = false
 			
 func draw_characters():
+	if len(character_list) == 0:
+		return
 	for i in character_list:
 		if i.vis or i.c_ch:
 			if i.c_delete:
@@ -237,41 +304,55 @@ func draw_characters():
 					draw_texture(i.character.get_texture(), i.pos, i.c_mod)
 			else:
 				draw_texture(i.character.get_texture(), i.pos, self.bgm)
-			
-func _draw():	
+
+func draw_bg_b():
+	delay(bgsp)
+	if self.bgm.r > 0:
+		self.bgm.r -= 0.01
+		self.bgm.g -= 0.01
+		self.bgm.b -= 0.01
+	else:
+		self.bg_b = false
+		self.bgm = Color(0, 0, 0, 1)
+	draw_texture(self.texture, Vector2.ZERO, self.bgm)
+	draw_characters()
+		
+func draw_bg_l():
+	delay(self.bgsp)
+	if self.bgm.r < 1.0:
+		self.bgm.r += 0.01
+		self.bgm.g += 0.01
+		self.bgm.b += 0.01
+	else:
+		self.bg_l = false
+		self.bgm = Color(1, 1, 1, 1)
+	draw_texture(self.texture, Vector2.ZERO, self.bgm)
+	draw_characters()
+	
+func _draw():
+	if self.get_texture() == null:
+		return
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
-		self.bg.set_texture(load(bg_list[bgid]))
+		self.set_texture(load(bg_list[bgid]))
 		self.bg_c = false
 	if bg_b:
-		delay(bgsp)
-		if self.bgm.r > 0:
-			self.bgm.r -= 0.01
-			self.bgm.g -= 0.01
-			self.bgm.b -= 0.01
-		else:
-			self.bg_b = false
-			self.bgm = Color(0, 0, 0, 1)
-		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
-		draw_characters()
+		draw_bg_b()
 	elif self.bg_l:
-		delay(self.bgsp)
-		if self.bgm.r < 1.0:
-			self.bgm.r += 0.01
-			self.bgm.g += 0.01
-			self.bgm.b += 0.01
-		else:
-			self.bg_l = false
-			self.bgm = Color(1, 1, 1, 1)
-		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
-		draw_characters()
+		draw_bg_l()
 	else:
-		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+		draw_texture(self.texture, Vector2.ZERO, self.bgm)
 		draw_characters()
-	if not self.bg_b and not self.bg_l:
-		if self.wait_enter:
-			draw_wait_symbol()
+		
+	if not self.bg_b and not self.bg_l:		
 		draw_text()
 		draw_name()
+		if self.wait_enter:
+			draw_wait_symbol()
+		else:
+			fr = 0
+			cfr = 4
+			fir_s = true
+			fir_c = false
 		if self.sh_c:
 			draw_choice()
 
@@ -408,7 +489,7 @@ func command_section():
 			while ch != '|':
 				bid += ch
 				ch = self.read_file()
-			self.bg.set_texture(load(bg_list[int(bid)]))
+			self.set_texture(load(bg_list[int(bid)]))
 		elif com_id == "1":
 			var sp = ""
 			ch = self.read_file()
@@ -564,6 +645,164 @@ func command_section():
 			self.ch_t = tx
 			self.ch_rt = rt
 			self.sh_c = true
+	elif com_id == "4":
+		com_id = ""
+		ch = self.read_file()
+		while ch != '|':
+			com_id += ch
+			ch = self.read_file()
+		if com_id == "0":
+			var sid = ""
+			var lp = ""
+			var vl = ""
+			ch = self.read_file()
+			while ch != ',':
+				sid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				lp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != '|':
+				vl += ch
+				ch = self.read_file()
+			self.sound_lp = false
+			self.sound.stop()
+			self.sound.set_stream(load(self.sound_list[int(sid)]))
+			self.sound.set_volume_db(float(vl))
+			self.sound_lp = bool(int(lp))
+			self.sound.play()
+		elif com_id == "1":
+			self.sound.stream_paused = true
+			ch = self.read_file()
+		elif com_id == "2":
+			self.sound.stream_paused = false
+			ch = self.read_file()
+		elif com_id == "3":
+			var vl = ""
+			ch = self.read_file()
+			while ch != '|':
+				vl += ch
+				ch = self.read_file()
+			self.sound.set_volume_db(float(vl))
+		elif com_id == "4":
+			var dl = ""
+			ch = self.read_file()
+			while ch != '|':
+				dl += ch
+				ch = self.read_file()
+			sound_dl = int(dl)
+			sound_stp = true
+		elif com_id == "5":
+			var sid = ""
+			var dl = ""
+			var vl = ""
+			var lp = ""
+			ch = self.read_file()
+			while ch != ',':
+				sid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				dl += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				vl += ch
+				ch = self.read_file()
+			while ch != '|':
+				lp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			self.sound_lp = false
+			self.sound.stop()
+			self.sound_dl = int(dl)
+			self.sound_vl = float(vl)
+			self.sound_str = true
+			self.sound.set_volume_db(-60)
+			self.sound.set_stream(load(self.sound_list[int(sid)]))
+			self.sound_lp = bool(int(lp))
+			self.sound.play()
+	elif com_id == "5":
+		com_id = ""
+		ch = self.read_file()
+		while ch != '|':
+			com_id += ch
+			ch = self.read_file()
+		if com_id == "0":
+			var sid = ""
+			var lp = ""
+			var vl = ""
+			ch = self.read_file()
+			while ch != ',':
+				sid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				lp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != '|':
+				vl += ch
+				ch = self.read_file()
+			self.music_lp = false
+			self.music.stop()
+			self.music.set_stream(load(self.music_list[int(sid)]))
+			self.music.set_volume_db(float(vl))
+			self.music_lp = bool(int(lp))
+			self.music.play()
+		elif com_id == "1":
+			self.music.stream_paused = true
+			ch = self.read_file()
+		elif com_id == "2":
+			self.music.stream_paused = false
+			ch = self.read_file()
+		elif com_id == "3":
+			var vl = ""
+			ch = self.read_file()
+			while ch != '|':
+				vl += ch
+				ch = self.read_file()
+			self.music.set_volume_db(float(vl))
+		elif com_id == "4":
+			var dl = ""
+			ch = self.read_file()
+			while ch != '|':
+				dl += ch
+				ch = self.read_file()
+			music_dl = int(dl)
+			music_stp = true
+		elif com_id == "5":
+			var sid = ""
+			var dl = ""
+			var vl = ""
+			var lp = ""
+			ch = self.read_file()
+			while ch != ',':
+				sid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				dl += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				vl += ch
+				ch = self.read_file()
+			while ch != '|':
+				lp += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			self.music_lp = false
+			self.music.stop()
+			self.music_dl = int(dl)
+			self.music_vl = float(vl)
+			self.music_str = true
+			self.music.set_volume_db(-60)
+			self.music.set_stream(load(self.music_list[int(sid)]))
+			self.music_lp = bool(int(lp))
+			self.music.play()
 	elif com_id == "t":
 		var tid = ""
 		ch = self.read_file()

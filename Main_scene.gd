@@ -5,10 +5,10 @@ var w = load("res://WYSAR.gd")
 
 var bgs = ["res://bgs/bg.png", "res://bgs/bg1.jpg"]
 var fonts = ["res://fonts/0.ttf"]
-var sn = ["res://fonts/0.ttf"]
-var ms = ["res://fonts/0.ttf"]
+var sn = ["res://music/fx.wav"]
+var ms = ["res://music/bg.ogg", "res://music/bgdr.ogg"]
 var ch = [WYSAR_Character.new(["res://MCH/1.png", "res://MCH/2.png"])]
-var v_t = ["vhs317ch"]
+var v_t = ["vhs317ch", "Test string from vars"]
 
 var wysar = WYSAR.new("res://texts/0.tres", bgs, fonts, sn, ms, ch, v_t)
 
