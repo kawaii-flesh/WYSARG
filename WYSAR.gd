@@ -26,7 +26,6 @@ var vis_name: bool = true
 var wait_enter: bool = false
 var clear_text: bool = false
 
-var text_list: PoolStringArray = []
 var bg_list: PoolStringArray = []
 var fonts_list: PoolStringArray = []
 var sound_list: PoolStringArray = []
@@ -42,13 +41,12 @@ var bgid: int = 0
 var bgm: Color = Color(1.0, 1.0, 1.0, 1.0)
 
 var sh_c: bool = false
-var ch_t: PoolStringArray = []
-var ch_dt: PoolStringArray = []
-var ch_rt: PoolStringArray = []
-var ch_p: Vector2 = Vector2.ZERO
-var ch_cur: int = 0
-var ch_mkd: bool = false
-var ch_prsd: bool = false
+var choice_t: PoolStringArray = []
+var choice_rt: PoolStringArray = []
+var choice_p: Vector2 = Vector2.ZERO
+var choice_cur: int = 0
+var choice_mkd: bool = false
+var choice_prsd: bool = false
 
 var sound: AudioStreamPlayer = AudioStreamPlayer.new()
 var sound_lp: bool = false
@@ -168,13 +166,13 @@ func _process(delta):
 			self.music_str = false
 			self.music.set_volume_db(self.sound_vl)
 			
-	if self.sh_c and self.ch_mkd == false:
+	if self.sh_c and self.choice_mkd == false:
 		make_choice()
 		update()
 		return
-	if self.ch_mkd:
-		choice_action(self.ch_rt[self.ch_cur])
-		self.ch_mkd = false
+	if self.choice_mkd:
+		choice_action(self.choice_rt[self.choice_cur])
+		self.choice_mkd = false
 		self.sh_c = false
 		
 	for i in character_list:
@@ -245,33 +243,33 @@ func draw_name():
 	draw_string(self.name_fnt, self.name_pos, self.name_str, self.name_clr)
 
 func draw_choice():
-	var pos = self.ch_p
+	var pos = self.choice_p
 	var cnt = 0
-	for i in self.ch_t:
-		if self.ch_cur == cnt:
+	for i in self.choice_t:
+		if self.choice_cur == cnt:
 			i = '>' + i 
 		draw_string(self.text_fnt, pos, i, self.text_clr)
 		pos.y += self.text_csv
 		cnt += 1
 
 func make_choice():
-	if self.ch_mkd == false:
-		if Input.is_key_pressed(KEY_UP) and self.ch_prsd == false:
-			if self.ch_cur == 0:
-				self.ch_cur = len(self.ch_rt) - 1
+	if self.choice_mkd == false:
+		if Input.is_key_pressed(KEY_UP) and self.choice_prsd == false:
+			if self.choice_cur == 0:
+				self.choice_cur = len(self.choice_rt) - 1
 			else:
-				self.ch_cur -= 1
-			self.ch_prsd = true
-		elif Input.is_key_pressed(KEY_DOWN) and self.ch_prsd == false:
-			if self.ch_cur == len(self.ch_rt) - 1:
-				self.ch_cur = 0
+				self.choice_cur -= 1
+			self.choice_prsd = true
+		elif Input.is_key_pressed(KEY_DOWN) and self.choice_prsd == false:
+			if self.choice_cur == len(self.choice_rt) - 1:
+				self.choice_cur = 0
 			else:
-				self.ch_cur += 1
-			self.ch_prsd = true
+				self.choice_cur += 1
+			self.choice_prsd = true
 		elif Input.is_key_pressed(KEY_ENTER):
-			self.ch_mkd = true
+			self.choice_mkd = true
 		elif Input.is_key_pressed(KEY_UP) == false and Input.is_key_pressed(KEY_DOWN) == false:			
-			self.ch_prsd = false
+			self.choice_prsd = false
 			
 func draw_characters():
 	if len(character_list) == 0:
@@ -639,11 +637,11 @@ func command_section():
 					ch = self.read_file()
 				ch = self.read_file()
 				rt += [n]
-			self.ch_cur = 0
-			self.ch_mkd = false
-			self.ch_p = Vector2(int(xp), int(yp))
-			self.ch_t = tx
-			self.ch_rt = rt
+			self.choice_cur = 0
+			self.choice_mkd = false
+			self.choice_p = Vector2(int(xp), int(yp))
+			self.choice_t = tx
+			self.choice_rt = rt
 			self.sh_c = true
 	elif com_id == "4":
 		com_id = ""
@@ -819,3 +817,220 @@ func command_section():
 		self.name_str = self.vars[int(tid)] 
 	if current_file_text[current_pos_in_file] == '\n':
 		current_pos_in_file += 1
+		
+	
+func save_g(fn:String):
+	var save_game = File.new()
+	save_game.open(fn, File.WRITE)
+	save_game.store_line(current_file.get_path())
+	save_game.store_line(String(current_pos_in_file))
+	save_game.store_line(text_str)
+	save_game.store_line(name_str)
+	if text_fnt.get_font_data() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(text_fnt.get_font_data().get_font_path())
+	if name_fnt.get_font_data() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(name_fnt.get_font_data().get_font_path())
+	save_game.store_line(String(text_pos))
+	save_game.store_line(String(name_pos))
+	save_game.store_line(text_clr.to_html())
+	save_game.store_line(name_clr.to_html())
+	save_game.store_line(String(text_csh))
+	save_game.store_line(String(text_csv))
+	save_game.store_line(String(name_csh))
+	save_game.store_line(String(delay_text))
+	save_game.store_line(String(int(vis_text)))
+	save_game.store_line(String(int(vis_name)))
+	
+	save_game.store_line(String(int(wait_enter)))
+	save_game.store_line(String(int(clear_text)))
+
+	save_game.store_line(String(bg_list))
+	save_game.store_line(String(fonts_list))
+	save_game.store_line(String(sound_list))
+	save_game.store_line(String(music_list))
+	save_game.store_line(String(vars))
+
+	save_game.store_line(String(int(bg_b)))
+	save_game.store_line(String(int(bg_l)))
+	save_game.store_line(String(int(bg_c)))
+	save_game.store_line(String(bgsp))
+	save_game.store_line(String(bgid))
+	save_game.store_line(bgm.to_html())
+
+	save_game.store_line(String(int(sh_c)))
+	save_game.store_line(String(choice_t))
+	save_game.store_line(String(choice_rt))
+	save_game.store_line(String(choice_p))
+	save_game.store_line(String(choice_cur))
+	save_game.store_line(String(int(choice_mkd)))
+	save_game.store_line(String(int(choice_prsd)))
+	
+	if sound.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(sound.get_stream().get_path())
+	if sound.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(sound.get_volume_db()))
+	if sound.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(sound.get_playback_position()))
+	if sound.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(int(sound.get_stream_paused())))
+	save_game.store_line(String(int(sound_lp)))
+	save_game.store_line(String(sound_dl))
+	save_game.store_line(String(int(sound_stp)))
+	save_game.store_line(String(int(sound_str)))
+	save_game.store_line(String(sound_vl))
+	if music.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(music.get_stream().get_path())
+	if music.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(music.get_volume_db()))
+	if music.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(music.get_playback_position()))
+	if music.get_stream() == null:
+		save_game.store_line("-")
+	else:
+		save_game.store_line(String(int(music.get_stream_paused())))
+	save_game.store_line(String(int(music_lp)))
+	save_game.store_line(String(music_dl))
+	save_game.store_line(String(int(music_stp)))
+	save_game.store_line(String(int(music_str)))
+	save_game.store_line(String(music_vl))
+	
+	save_game.store_line(String(time))
+	save_game.store_line(String(int(key_enter_prs)))
+	save_game.store_line(String(int(key_enter_rel)))
+	
+	save_game.store_line(String(fr))
+	save_game.store_line(String(cfr))
+	save_game.store_line(String(int(fir_s)))
+	save_game.store_line(String(int(fir_c)))
+	
+	save_game.store_line(String(len(character_list)))
+	for i in character_list:
+		if i.character.get_texture() == null:
+			save_game.store_line("-")
+		else:
+			save_game.store_line(i.character.get_texture().get_path())
+		save_game.store_line(String(i.texture_list))
+		save_game.store_line(String(i.pos))
+		save_game.store_line(String(int(i.vis)))
+		save_game.store_line(String(int(i.c_add)))
+		save_game.store_line(String(int(i.c_delete)))
+		save_game.store_line(i.c_mod.to_html())
+		save_game.store_line(String(int(i.c_ch)))
+		save_game.store_line(String(i.c_nt))
+	
+	save_game.close()
+	
+func load_g(fn:String):
+	var save_game = File.new()
+	save_game.open(fn, File.READ)
+	
+	var file_pat = save_game.get_line()
+	var file_pos = int(save_game.get_line())
+	var text_string = save_game.get_line()
+	var name_string = save_game.get_line()
+	var text_font = save_game.get_line()
+	var name_font = save_game.get_line()
+	
+	var text_position = str2pst(save_game.get_line())
+	var name_position = str2pst(save_game.get_line())
+	var text_color = Color(save_game.get_line())
+	var name_color = Color(save_game.get_line())
+	var text_chsph = int(save_game.get_line())
+	var text_chspv = int(save_game.get_line())
+	var name_chsph = int(save_game.get_line())
+	var delay_symb = float(save_game.get_line())
+	var visual_text = bool(int(save_game.get_line()))
+	var visual_name = bool(int(save_game.get_line()))
+	
+	var wait_enterb = bool(int(save_game.get_line()))
+	var clear_textb = bool(int(save_game.get_line()))
+
+	var bkg_list = str2lst(save_game.get_line())
+	var fnts_list = str2lst(save_game.get_line())
+	var snd_list = str2lst(save_game.get_line())
+	var msc_list = str2lst(save_game.get_line())
+	var vrs_list = str2lst(save_game.get_line())
+	
+	var bg_bb = bool(int(save_game.get_line()))
+	var bg_lb = bool(int(save_game.get_line()))
+	var bg_cb = bool(int(save_game.get_line()))
+	var bg_sp = float(save_game.get_line())
+	var bg_id = int(save_game.get_line())
+	var bg_md = Color(save_game.get_line())
+
+	var show_choice = bool(int(save_game.get_line()))
+	var choice_text = str2lst(save_game.get_line())
+	var choice_return = str2lst(save_game.get_line())
+	var choice_pos = str2pst(save_game.get_line())
+	var choice_cur = int(save_game.get_line())
+	var choice_maked = bool(int(save_game.get_line()))
+	var choice_pressed = bool(int(save_game.get_line()))
+	
+	var snd_pat = save_game.get_line()
+	var snd_vl_db = float(save_game.get_line())
+	var snd_pos = float(save_game.get_line())
+	var snd_stpd = bool(int(save_game.get_line()))
+	var snd_lop = bool(int(save_game.get_line()))
+	var snd_dl = float(bool(int(save_game.get_line())))
+	var snd_need_stp = bool(int(save_game.get_line()))
+	var snd_need_str = bool(int(save_game.get_line()))
+	var snd_need_vl_db = float(save_game.get_line())
+	
+	var msc_pat = save_game.get_line()
+	var msc_vl_db = float(save_game.get_line())
+	var msc_pos = float(save_game.get_line())
+	var msc_stpd = bool(int(save_game.get_line()))
+	var msc_lop = bool(int(save_game.get_line()))
+	var msc_dl = float(bool(int(save_game.get_line())))
+	var msc_need_stp = bool(int(save_game.get_line()))
+	var msc_need_str = bool(int(save_game.get_line()))
+	var msc_need_vl_db = float(save_game.get_line())
+	
+	var tmn = float(save_game.get_line())
+	var keprs = bool(int(save_game.get_line()))
+	var kerel = bool(int(save_game.get_line()))
+	
+	var frame_cur = int(save_game.get_line())
+	var frame_cfr = int(save_game.get_line())
+	var fir_sym = bool(int(save_game.get_line()))
+	var fir_clr = bool(int(save_game.get_line()))
+	
+	var chr_cnt = int(save_game.get_line())
+	var chr_lst = []
+	for i in range(0, chr_cnt):
+		var texture_pat = save_game.get_line()
+		var texture_lst = str2lst(save_game.get_line())
+		var texture_pos = str2pst(save_game.get_line())
+		var texture_visual = bool(int(save_game.get_line()))
+		var texture_add = bool(int(save_game.get_line()))
+		var texture_delete = bool(int(save_game.get_line()))
+		var texture_mod = Color(save_game.get_line())
+		var texture_chg = bool(int(save_game.get_line()))
+		var texture_new_tex = int(save_game.get_line())
+		chr_lst.append(WYSAR_Character.new(texture_lst))
+	
+	save_game.close()
+
+func str2lst(strg: String):
+	return strg.substr(1, len(strg)-2).split(", ")
+
+func str2pst(strg: String):
+	return Vector2(int(strg.substr(1, len(strg)-2).split(", ")[0]), int(strg.substr(1, len(strg)-2).split(", ")[1]))
