@@ -821,7 +821,8 @@ func command_section():
 	
 func save_g(fn:String):
 	var save_game = File.new()
-	save_game.open(fn, File.WRITE)
+	if save_game.open(fn, File.WRITE) != OK:
+		return
 	save_game.store_line(current_file.get_path())
 	save_game.store_line(String(current_pos_in_file))
 	save_game.store_line(text_str)
@@ -943,7 +944,8 @@ func save_g(fn:String):
 	
 func load_g(fn:String):
 	var save_game = File.new()
-	save_game.open(fn, File.READ)
+	if save_game.open(fn, File.READ) != OK:
+		return
 	
 	var file_pat = save_game.get_line()
 	self.open_file(file_pat)
