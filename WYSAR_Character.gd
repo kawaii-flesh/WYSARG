@@ -2,7 +2,6 @@ extends Sprite
 
 class_name WYSAR_Character
 
-var character: Sprite = Sprite.new()
 var texture_list: PoolStringArray = []
 var pos: Vector2
 var vis: bool = false
