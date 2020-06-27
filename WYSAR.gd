@@ -5,6 +5,7 @@ class_name WYSAR
 var wc = preload("res://WYSAR_Character.gd")
 
 var current_file: File = File.new()
+var current_file_path: String = ""
 var current_file_text: String = ""
 var current_pos_in_file: int = 0
 
@@ -92,6 +93,7 @@ func delay(t: float):
 func open_file(nf):
 	current_file.close()
 	current_file.open(nf, File.READ)
+	current_file_path = nf
 	current_file_text = current_file.get_as_text()
 	current_pos_in_file = 0
 
@@ -823,7 +825,7 @@ func save_g(fn:String):
 	var save_game = File.new()
 	if save_game.open(fn, File.WRITE) != OK:
 		return
-	save_game.store_line(current_file.get_path())
+	save_game.store_line(current_file_path)
 	save_game.store_line(String(current_pos_in_file))
 	save_game.store_line(text_str)
 	save_game.store_line(name_str)
@@ -946,7 +948,6 @@ func load_g(fn:String):
 	var save_game = File.new()
 	if save_game.open(fn, File.READ) != OK:
 		return
-	
 	var file_pat = save_game.get_line()
 	self.open_file(file_pat)
 	var file_pos = int(save_game.get_line())
@@ -1102,7 +1103,8 @@ func load_g(fn:String):
 		var texture_chg = bool(int(save_game.get_line()))
 		var texture_new_tex = int(save_game.get_line())
 		var char_new = WYSAR_Character.new(texture_lst)
-		char_new.set_texture(load(texture_pat))
+		if texture_pat != "-":
+			char_new.set_texture(load(texture_pat))
 		char_new.pos = texture_pos
 		char_new.vis = texture_visual
 		char_new.c_add = texture_add
@@ -1113,11 +1115,11 @@ func load_g(fn:String):
 		chr_lst.append(char_new)
 	character_list = chr_lst
 	if snd_pat != "-" and msc_paus == false:
-		self.sound.seek(snd_pos)
+		#self.sound.seek(snd_pos)
 		self.sound.play()
 	if msc_pat != "-" and snd_paus == false:
-		self.music.seek(msc_pos)
-		self.music.play()
+		#self.music.seek(msc_pos)
+		self.music.play()	
 	save_game.close()
 
 func str2lst(strg: String):
