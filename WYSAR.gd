@@ -277,7 +277,7 @@ func draw_characters():
 	if len(character_list) == 0:
 		return
 	for i in character_list:
-		if i.get_texture() == null:
+		if i.texture == null:
 			return
 		if i.vis or i.c_ch:
 			if i.c_delete:
@@ -285,11 +285,11 @@ func draw_characters():
 					i.c_mod.a -= 0.05
 					if i.c_mod.a < 0:
 						i.c_mod = Color(1, 1, 1, 0)
-					draw_texture(i.get_texture(), i.pos, i.c_mod)
+					draw_texture(i.texture, i.pos, i.c_mod)
 				else:
 					i.c_delete = false
 					i.vis = false
-					draw_texture(i.get_texture(), i.pos, i.c_mod)
+					draw_texture(i.texture, i.pos, i.c_mod)
 					if i.c_ch:
 						i.set_texture(load(i.texture_list[i.c_nt]))
 						i.c_ch = false
@@ -300,12 +300,12 @@ func draw_characters():
 					i.c_mod.a += 0.05
 					if(i.c_mod.a > 1):
 						i.c_mod = Color(1, 1, 1, 1)
-					draw_texture(i.get_texture(), i.pos, i.c_mod)
+					draw_texture(i.texture, i.pos, i.c_mod)
 				else:
 					i.c_add = false
-					draw_texture(i.get_texture(), i.pos, i.c_mod)
+					draw_texture(i.texture, i.pos, i.c_mod)
 			else:
-				draw_texture(i.get_texture(), i.pos, self.bgm)
+				draw_texture(i.texture, i.pos, self.bgm)
 
 func draw_bg_b():
 	if self.get_texture() == null:
@@ -564,7 +564,7 @@ func command_section():
 			while ch != '|':
 				yp += ch
 				ch = self.read_file()
-			self.character_list[int(cid)].set_texture(load(self.character_list[int(cid)].texture_list[int(tid)]))
+			self.character_list[int(cid)].texture = load(self.character_list[int(cid)].texture_list[int(tid)])
 			self.character_list[int(cid)].pos = Vector2(int(xp), int(yp))
 			self.character_list[int(cid)].vis = true
 			self.character_list[int(cid)].c_add = true
@@ -1110,7 +1110,7 @@ func load_g(fn:String):
 		var texture_new_tex = int(save_game.get_line())
 		var char_new = WYSAR_Character.new(texture_lst)
 		if texture_pat != "-":
-			char_new.set_texture(load(texture_pat))
+			char_new.texture = load(texture_pat)
 		char_new.pos = texture_pos
 		char_new.vis = texture_visual
 		char_new.c_add = texture_add

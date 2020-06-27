@@ -14,7 +14,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://WYSAR.gd"
 }, {
-"base": "Sprite",
+"base": "Node",
 "class": "WYSAR_Character",
 "language": "GDScript",
 "path": "res://WYSAR_Character.gd"

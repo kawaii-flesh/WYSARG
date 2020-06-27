@@ -1,7 +1,8 @@
-extends Sprite
+extends Node
 
 class_name WYSAR_Character
 
+var texture: Texture
 var texture_list: PoolStringArray = []
 var pos: Vector2
 var vis: bool = false
