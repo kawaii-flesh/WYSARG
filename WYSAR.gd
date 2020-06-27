@@ -277,6 +277,8 @@ func draw_characters():
 	if len(character_list) == 0:
 		return
 	for i in character_list:
+		if i.get_texture() == null:
+			return
 		if i.vis or i.c_ch:
 			if i.c_delete:
 				if i.c_mod.a > 0:
@@ -306,6 +308,8 @@ func draw_characters():
 				draw_texture(i.get_texture(), i.pos, self.bgm)
 
 func draw_bg_b():
+	if self.get_texture() == null:
+		return
 	delay(bgsp)
 	if self.bgm.r > 0:
 		self.bgm.r -= 0.01
@@ -318,6 +322,8 @@ func draw_bg_b():
 	draw_characters()
 		
 func draw_bg_l():
+	if self.get_texture() == null:
+		return
 	delay(self.bgsp)
 	if self.bgm.r < 1.0:
 		self.bgm.r += 0.01
@@ -329,9 +335,7 @@ func draw_bg_l():
 	draw_texture(self.texture, Vector2.ZERO, self.bgm)
 	draw_characters()
 	
-func _draw():
-	if self.get_texture() == null:
-		return
+func _draw():	
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
 		self.set_texture(load(bg_list[bgid]))
 		self.bg_c = false
@@ -340,6 +344,8 @@ func _draw():
 	elif self.bg_l:
 		draw_bg_l()
 	else:
+		if self.get_texture() == null:
+			return
 		draw_texture(self.texture, Vector2.ZERO, self.bgm)
 		draw_characters()
 		
