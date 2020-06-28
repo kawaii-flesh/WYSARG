@@ -291,7 +291,7 @@ func draw_characters():
 					i.vis = false
 					draw_texture(i.texture, i.pos, i.c_mod)
 					if i.c_ch:
-						i.set_texture(load(i.texture_list[i.c_nt]))
+						i.texture = load(i.texture_list[i.c_nt])
 						i.c_ch = false
 						i.c_add = true
 						i.vis = true
@@ -935,10 +935,10 @@ func save_g(fn:String):
 	
 	save_game.store_line(String(len(character_list)))
 	for i in character_list:
-		if i.get_texture() == null:
+		if i.texture == null:
 			save_game.store_line("-")
 		else:
-			save_game.store_line(i.get_texture().get_path())
+			save_game.store_line(i.texture.get_path())
 		save_game.store_line(String(i.texture_list))
 		save_game.store_line(String(i.pos))
 		save_game.store_line(String(int(i.vis)))
