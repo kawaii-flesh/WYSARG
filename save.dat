@@ -1,0 +1,83 @@
+res://texts/2.tres
+167
+Stop
+Test name
+res://fonts/0.ttf
+res://fonts/0.ttf
+24
+24
+(10, 470)
+(10, 445)
+ff55ffff
+ff55ffff
+16
+21
+16
+100
+1
+1
+1
+1
+[res://bgs/bg.png, res://bgs/bg1.jpg]
+[res://fonts/0.ttf]
+[res://music/fx.wav]
+[res://music/bg.ogg, res://music/bgdr.ogg]
+[vhs317ch, Test string from vars]
+res://bgs/bg.png
+0
+0
+0
+0
+0
+ffffffff
+0
+[Тест текст вара и нвар, Тест звук и музыка, Заново]
+[res://texts/1.tres, res://texts/2.tres, res://texts/0.tres]
+(100, 100)
+1
+0
+0
+res://music/fx.wav
+2
+0.304762
+1
+1
+1
+0
+0
+2
+res://music/bgdr.ogg
+2
+1.822766
+0
+1
+0
+0
+0
+0
+0
+0
+1
+6
+4
+1
+0
+2
+-
+[res://MCH/1.png, res://MCH/2.png]
+(0, 0)
+0
+0
+0
+00ffffff
+0
+0
+-
+[res://MCH/c20.png]
+(0, 0)
+0
+0
+0
+00ffffff
+0
+0

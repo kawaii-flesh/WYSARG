@@ -2,6 +2,8 @@ extends Sprite
 
 class_name WYSAR
 
+var enable: bool = true
+
 var wc = preload("res://WYSAR_Character.gd")
 
 var current_file: File = File.new()
@@ -136,6 +138,8 @@ func choice_action(ch):
 	open_file(ch)
 	
 func _process(delta):
+	if enable == false:
+		return
 	if self.sound_stp and not self.sound_str:
 		delay(sound_dl)
 		if self.sound.get_volume_db() >= -60:
@@ -176,7 +180,6 @@ func _process(delta):
 		choice_action(self.choice_rt[self.choice_cur])
 		self.choice_mkd = false
 		self.sh_c = false
-		
 	for i in character_list:
 		if i.c_add or i.c_delete:
 			update()
@@ -1050,7 +1053,7 @@ func load_g(fn:String):
 		self.sound.stream_paused = snd_paus
 	var snd_lop = bool(int(save_game.get_line()))
 	self.sound_lp = snd_lop
-	var snd_dl = float(bool(int(save_game.get_line())))
+	var snd_dl = float(save_game.get_line())
 	self.sound_dl = snd_dl
 	var snd_need_stp = bool(int(save_game.get_line()))
 	self.sound_stp = snd_need_stp
@@ -1065,20 +1068,20 @@ func load_g(fn:String):
 	var msc_vl_db = float(save_game.get_line())
 	if msc_pat != "-":
 		self.music.set_volume_db(msc_vl_db)
-	var msc_pos = float(save_game.get_line())	
+	var msc_pos = float(save_game.get_line())
 	var msc_paus = bool(int(save_game.get_line()))
 	if msc_pat != "-":
 		self.music.stream_paused = msc_paus
 	var msc_lop = bool(int(save_game.get_line()))
 	self.music_lp = msc_lop
-	var msc_dl = float(bool(int(save_game.get_line())))
+	var msc_dl = float(save_game.get_line())
 	self.music_dl = msc_dl
 	var msc_need_stp = bool(int(save_game.get_line()))
 	self.music_stp = msc_need_stp
 	var msc_need_str = bool(int(save_game.get_line()))
 	self.music_str = msc_need_str
 	var msc_need_vl_db = float(save_game.get_line())
-	self.music_vl = msc_need_vl_db	
+	self.music_vl = msc_need_vl_db
 	
 	var tmn = float(save_game.get_line())
 	self.time = tmn
@@ -1121,11 +1124,9 @@ func load_g(fn:String):
 		chr_lst.append(char_new)
 	character_list = chr_lst
 	if snd_pat != "-" and msc_paus == false:
-		#self.sound.seek(snd_pos)
-		self.sound.play()
+		self.sound.play(snd_pos)
 	if msc_pat != "-" and snd_paus == false:
-		#self.music.seek(msc_pos)
-		self.music.play()	
+		self.music.play(msc_pos)
 	save_game.close()
 
 func str2lst(strg: String):
