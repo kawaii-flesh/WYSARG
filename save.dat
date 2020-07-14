@@ -1,7 +1,7 @@
-res://texts/2.tres
-167
-Stop
-Test name
+res://texts/0.tres
+222
+ВТФ?_
+Менгера
 res://fonts/0.ttf
 res://fonts/0.ttf
 24
@@ -31,53 +31,53 @@ res://bgs/bg.png
 0
 ffffffff
 0
-[Тест текст вара и нвар, Тест звук и музыка, Заново]
-[res://texts/1.tres, res://texts/2.tres, res://texts/0.tres]
-(100, 100)
+[]
+[]
+(0, 0)
+0
+0
+0
+-
+-
+-
+0
+0
+0
+0
+0
+0
+-
+-
+-
+0
+0
+0
+0
+0
+0
+0
+0
 1
-0
-0
-res://music/fx.wav
-2
-0.304762
-1
-1
-1
-0
-0
-2
-res://music/bgdr.ogg
-2
-1.822766
-0
-1
-0
-0
-0
-0
-0
-0
-1
-6
+3
 4
+0
+1
+2
+res://MCH/1.png
+[res://MCH/1.png, res://MCH/2.png]
+(300, 300)
 1
 0
-2
--
-[res://MCH/1.png, res://MCH/2.png]
-(0, 0)
+0
+ffffffff
 0
 0
-0
-00ffffff
-0
-0
--
+res://MCH/c20.png
 [res://MCH/c20.png]
-(0, 0)
+(50, 145)
+1
 0
 0
-0
-00ffffff
+ffffffff
 0
 0

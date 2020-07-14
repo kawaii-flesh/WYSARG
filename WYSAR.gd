@@ -1,4 +1,4 @@
-extends Sprite
+extends Node2D
 
 class_name WYSAR
 
@@ -11,6 +11,7 @@ var current_file_path: String = ""
 var current_file_text: String = ""
 var current_pos_in_file: int = 0
 
+var bg: Sprite = Sprite.new()
 var text_str: String
 var name_str: String
 var text_fnt: DynamicFont = DynamicFont.new()
@@ -76,7 +77,7 @@ func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStr
 	sound.connect("finished", self, "sound_loop")
 	self.add_child(music)
 	music.connect("finished", self, "music_loop")
-	self.centered = false
+	self.bg.centered = false
 	self.vars = vb
 	open_file(stf)	
 
@@ -311,7 +312,7 @@ func draw_characters():
 				draw_texture(i.texture, i.pos, self.bgm)
 
 func draw_bg_b():
-	if self.get_texture() == null:
+	if self.bg.get_texture() == null:
 		return
 	delay(bgsp)
 	if self.bgm.r > 0:
@@ -321,11 +322,11 @@ func draw_bg_b():
 	else:
 		self.bg_b = false
 		self.bgm = Color(0, 0, 0, 1)
-	draw_texture(self.texture, Vector2.ZERO, self.bgm)
+	draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
 	draw_characters()
 		
 func draw_bg_l():
-	if self.get_texture() == null:
+	if self.bg.get_texture() == null:
 		return
 	delay(self.bgsp)
 	if self.bgm.r < 1.0:
@@ -335,21 +336,21 @@ func draw_bg_l():
 	else:
 		self.bg_l = false
 		self.bgm = Color(1, 1, 1, 1)
-	draw_texture(self.texture, Vector2.ZERO, self.bgm)
+	draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
 	draw_characters()
 	
 func _draw():	
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
-		self.set_texture(load(bg_list[bgid]))
+		self.bg.set_texture(load(bg_list[bgid]))
 		self.bg_c = false
 	if bg_b:
 		draw_bg_b()
 	elif self.bg_l:
 		draw_bg_l()
 	else:
-		if self.get_texture() == null:
+		if self.bg.get_texture() == null:
 			return
-		draw_texture(self.texture, Vector2.ZERO, self.bgm)
+		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
 		draw_characters()
 		
 	if not self.bg_b and not self.bg_l:		
@@ -498,7 +499,7 @@ func command_section():
 			while ch != '|':
 				bid += ch
 				ch = self.read_file()
-			self.set_texture(load(bg_list[int(bid)]))
+			self.bg.set_texture(load(bg_list[int(bid)]))
 		elif com_id == "1":
 			var sp = ""
 			ch = self.read_file()
@@ -868,7 +869,7 @@ func save_g(fn:String):
 	save_game.store_line(String(music_list))
 	save_game.store_line(String(vars))
 
-	save_game.store_line(self.texture.get_path())
+	save_game.store_line(self.bg.texture.get_path())
 	save_game.store_line(String(int(bg_b)))
 	save_game.store_line(String(int(bg_l)))
 	save_game.store_line(String(int(bg_c)))
@@ -1012,7 +1013,7 @@ func load_g(fn:String):
 	self.vars = vrs_list
 	
 	var bg_pat = save_game.get_line()
-	self.set_texture(load(bg_pat))
+	self.bg.set_texture(load(bg_pat))
 	var bg_bb = bool(int(save_game.get_line()))
 	self.bg_b = bg_bb
 	var bg_lb = bool(int(save_game.get_line()))
