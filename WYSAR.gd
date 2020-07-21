@@ -79,7 +79,7 @@ func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStr
 	music.connect("finished", self, "music_loop")
 	self.bg.centered = false
 	self.vars = vb
-	open_file(stf)	
+	open_file(stf)
 
 func read_file():
 	if current_pos_in_file >= current_file_text.length():
@@ -827,6 +827,13 @@ func command_section():
 			tid += ch
 			ch = self.read_file()
 		self.name_str = self.vars[int(tid)] 
+	elif com_id == "open":
+		var nfo = ""
+		ch = self.read_file()
+		while ch != '|':
+			nfo += ch
+			ch = self.read_file()
+		self.open_file(nfo)
 	if current_file_text[current_pos_in_file] == '\n':
 		current_pos_in_file += 1
 		
@@ -965,7 +972,7 @@ func load_g(fn:String):
 	var text_string = save_game.get_line()
 	self.text_str = text_string
 	var name_string = save_game.get_line()
-	self.name_str = name_str
+	self.name_str = name_string
 	var text_font = save_game.get_line()
 	self.text_fnt.set_font_data(load(text_font))
 	var name_font = save_game.get_line()
@@ -1064,15 +1071,15 @@ func load_g(fn:String):
 	self.sound_vl = snd_need_vl_db
 		
 	var msc_pat = save_game.get_line()
-	if msc_pat != "-":
+	if msc_pat != "-":		
 		self.music.set_stream(load(msc_pat))
 	var msc_vl_db = float(save_game.get_line())
 	if msc_pat != "-":
-		self.music.set_volume_db(msc_vl_db)
+		self.music.set_volume_db(msc_vl_db)		
 	var msc_pos = float(save_game.get_line())
 	var msc_paus = bool(int(save_game.get_line()))
 	if msc_pat != "-":
-		self.music.stream_paused = msc_paus
+		self.music.stream_paused = msc_paus		
 	var msc_lop = bool(int(save_game.get_line()))
 	self.music_lp = msc_lop
 	var msc_dl = float(save_game.get_line())
@@ -1126,7 +1133,7 @@ func load_g(fn:String):
 	character_list = chr_lst
 	if snd_pat != "-" and msc_paus == false:
 		self.sound.play(snd_pos)
-	if msc_pat != "-" and snd_paus == false:
+	if msc_pat != "-" and msc_paus == false:
 		self.music.play(msc_pos)
 	save_game.close()
 

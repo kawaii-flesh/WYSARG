@@ -1,0 +1,54 @@
+text/name:
+|0|0|x,y| - set text position
+|0|1|x,y| - set name position
+|0|2|aarrggbb| - set text color
+|0|3|aarrggbb| - set text color
+|0|4|fnt_id,size| - set font and size
+|0|5|fnt_id,size| - set font and size
+|0|6|text| - set text
+|0|7|name| - set name
+|0|8|delay(ms)| - set text delay
+|0|9|space| - set text symbol space horizontal
+|0|a|space| - set text symbol space vertical
+|0|b|space| - set name symbol space horizontal
+
+bg:
+|1|0|bg_id| - set bg
+|1|1|delay(ms)| - blackout
+|1|2|delay(ms)| - dawn
+|1|3|delay(ms)| - blackout + dawn
+|1|4|delay(ms),bg_id| - blackout + change bg + dawn
+
+characters:
+|2|0|char_id,char_texture_id,x,y| - start show character
+|2|1|char_id| - stop show character
+|2|2|char_id| - show character
+|2|3|char_id,char_texture_id| - change texture
+
+choice:
+|3|0|number_of_choices,x,y,text1;text2;textn;return_tex1,return_tex2,return_texn|
+
+sound:
+|4|0|snd_id,loop(0/1),value(db)| - start play sound
+|4|1| - pause sound
+|4|2| - play sound
+|4|3|value(db)| - set sound value
+|4|4|delay(ms)| - stop with delay
+|4|5|snd_id,delay(ms),value(db),loop(0/1)| - start play with delay
+
+music:
+|5|0|msc_id,loop(0/1),value(db)| - start play music
+|5|1| - pause music
+|5|2| - play music
+|5|3|value(db)| - set music value
+|5|4|delay(ms)| - stop with delay
+|5|5|msc_id,delay(ms),value(db),loop(0/1)| - start play with delay
+
+text var:
+|t|text_var_id| - insert text var
+
+name var:
+|n|name_var_id| - insert name var
+
+open new file:
+|open|file_path| - open new file
