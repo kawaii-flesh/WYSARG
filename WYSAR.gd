@@ -5,6 +5,7 @@ class_name WYSAR
 var enable: bool = true
 
 var wc = preload("res://WYSAR_Character.gd")
+var os = preload("res://other_sprite.gd")
 
 var current_file: File = File.new()
 var current_file_path: String = ""
@@ -65,12 +66,17 @@ var music_stp = false
 var music_str: bool = false 
 var music_vl: float = 0.0
 
-func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha, vb: PoolStringArray):
+var other_sprites = []
+
+func _init(stf: String, bgs: PoolStringArray, fnts: PoolStringArray, sn: PoolStringArray, ms: PoolStringArray, cha, vb: PoolStringArray, ots):
 	self.bg_list = bgs
 	self.fonts_list = fnts
 	self.sound_list = sn
 	self.music_list = ms
 	self.character_list = cha
+	self.other_sprites = ots	
+	for j in self.other_sprites:
+		self.add_child(j)
 	for i in self.character_list:
 		self.add_child(i)
 	self.add_child(sound)
@@ -95,7 +101,9 @@ func delay(t: float):
 	
 func open_file(nf):
 	current_file.close()
-	current_file.open(nf, File.READ)
+	if current_file.open(nf, File.READ) != OK:
+		print("Can't open file: ", nf)
+		return
 	current_file_path = nf
 	current_file_text = current_file.get_as_text()
 	current_pos_in_file = 0
@@ -311,6 +319,17 @@ func draw_characters():
 			else:
 				draw_texture(i.texture, i.pos, self.bgm)
 
+func draw_other_sprites():	
+	if len(other_sprites) == 0:
+		return
+	for i in other_sprites:
+		if i.texture == null:
+			return
+		if i.vis and not (bg_b or bg_l):
+			draw_texture(i.texture, i.pos, i.c_mod)
+		elif i.vis:
+			draw_texture(i.texture, i.pos, self.bgm)
+	
 func draw_bg_b():
 	if self.bg.get_texture() == null:
 		return
@@ -323,6 +342,7 @@ func draw_bg_b():
 		self.bg_b = false
 		self.bgm = Color(0, 0, 0, 1)
 	draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+	draw_other_sprites()
 	draw_characters()
 		
 func draw_bg_l():
@@ -337,9 +357,10 @@ func draw_bg_l():
 		self.bg_l = false
 		self.bgm = Color(1, 1, 1, 1)
 	draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+	draw_other_sprites()
 	draw_characters()
 	
-func _draw():	
+func _draw():
 	if self.bg_b == false and self.bg_l == true and self.bg_c == true:
 		self.bg.set_texture(load(bg_list[bgid]))
 		self.bg_c = false
@@ -351,9 +372,10 @@ func _draw():
 		if self.bg.get_texture() == null:
 			return
 		draw_texture(self.bg.texture, Vector2.ZERO, self.bgm)
+		draw_other_sprites()
 		draw_characters()
 		
-	if not self.bg_b and not self.bg_l:		
+	if not self.bg_b and not self.bg_l:
 		draw_text()
 		draw_name()
 		if self.wait_enter:
@@ -724,7 +746,6 @@ func command_section():
 			while ch != '|':
 				lp += ch
 				ch = self.read_file()
-			ch = self.read_file()
 			self.sound_lp = false
 			self.sound.stop()
 			self.sound_dl = int(dl)
@@ -803,7 +824,6 @@ func command_section():
 			while ch != '|':
 				lp += ch
 				ch = self.read_file()
-			ch = self.read_file()
 			self.music_lp = false
 			self.music.stop()
 			self.music_dl = int(dl)
@@ -813,6 +833,50 @@ func command_section():
 			self.music.set_stream(load(self.music_list[int(sid)]))
 			self.music_lp = bool(int(lp))
 			self.music.play()
+	elif com_id == "6":
+		com_id = ""
+		ch = self.read_file()
+		while ch != '|':
+			com_id += ch
+			ch = self.read_file()
+		if com_id == "0":
+			var sid = ""
+			ch = self.read_file()
+			while ch != '|':
+				sid += ch
+				ch = self.read_file()
+			if int(sid) == -1:
+				for i in other_sprites:
+					i.vis = true
+			else:
+				self.other_sprites[int(sid)].vis = true
+		elif com_id == "1":
+			var sid = ""
+			ch = self.read_file()
+			while ch != '|':
+				sid += ch
+				ch = self.read_file()
+			if int(sid) == -1:
+				for i in other_sprites:
+					i.vis = false
+			else:
+				self.other_sprites[int(sid)].vis = false
+		elif com_id == "2":
+			var sid = ""
+			var x = ""
+			var y = ""
+			ch = self.read_file()
+			while ch != ',':
+				sid += ch
+				ch = self.read_file()
+			ch = self.read_file()
+			while ch != ',':
+				x += ch
+				ch = self.read_file()
+			while ch != '|':
+				y += ch
+				ch = self.read_file()
+			self.other_sprites[int(sid)].pos = Vector2(int(x), int(y))
 	elif com_id == "t":
 		var tid = ""
 		ch = self.read_file()
@@ -958,6 +1022,16 @@ func save_g(fn:String):
 		save_game.store_line(i.c_mod.to_html())
 		save_game.store_line(String(int(i.c_ch)))
 		save_game.store_line(String(i.c_nt))
+	
+	save_game.store_line(String(len(other_sprites)))
+	for i in other_sprites:
+		if i.texture == null:
+			save_game.store_line("-")
+		else:
+			save_game.store_line(i.texture.get_path())
+		save_game.store_line(String(i.pos))
+		save_game.store_line(String(int(i.vis)))
+		save_game.store_line(i.c_mod.to_html())
 	
 	save_game.close()
 	
@@ -1131,6 +1205,24 @@ func load_g(fn:String):
 		char_new.c_nt = texture_new_tex
 		chr_lst.append(char_new)
 	character_list = chr_lst
+	
+	var ots_cnt = int(save_game.get_line())
+	var ots_list = []
+	for i in range(0, ots_cnt):
+		var texture_pat = save_game.get_line()
+		var texture_pos = str2pst(save_game.get_line())
+		var texture_visual = bool(int(save_game.get_line()))
+		var texture_mod = Color(save_game.get_line())
+		var os_new = Other_sprite.new(texture_pat, texture_pos, texture_visual)
+		
+		if texture_pat != "-":
+			os_new.texture = load(texture_pat)
+		os_new.pos = texture_pos
+		os_new.vis = texture_visual
+		os_new.c_mod = texture_mod
+		ots_list.append(os_new)
+	other_sprites = ots_list
+	
 	if snd_pat != "-" and msc_paus == false:
 		self.sound.play(snd_pos)
 	if msc_pat != "-" and msc_paus == false:

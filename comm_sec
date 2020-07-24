@@ -44,6 +44,11 @@ music:
 |5|4|delay(ms)| - stop with delay
 |5|5|msc_id,delay(ms),value(db),loop(0/1)| - start play with delay
 
+other sprites:
+|6|0|spr_id| - set true visual
+|6|1|spr_id| - set false visual
+|6|2|spr_id,x,y| - set position
+
 text var:
 |t|text_var_id| - insert text var
 

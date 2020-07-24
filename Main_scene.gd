@@ -2,6 +2,7 @@ extends Node2D
 
 var wc = load("res://WYSAR_Character.gd")
 var w = load("res://WYSAR.gd")
+var os = preload("res://other_sprite.gd")
 
 var bgs = ["res://bgs/bg.png", "res://bgs/bg1.jpg"]
 var fonts = ["res://fonts/0.ttf"]
@@ -10,8 +11,9 @@ var ms = ["res://music/bg.ogg", "res://music/bgdr.ogg"]
 var ch = [WYSAR_Character.new(["res://MCH/1.png", "res://MCH/2.png"]),
 		  WYSAR_Character.new(["res://MCH/c20.png"])]
 var v_t = ["vhs317ch", "Test string from vars"]
+var ot_spr = [Other_sprite.new("res://bg-say.png", Vector2(0, 0), false)]
 
-var wysar = WYSAR.new("res://texts/0.tres", bgs, fonts, sn, ms, ch, v_t)
+var wysar = WYSAR.new("res://texts/0.tres", bgs, fonts, sn, ms, ch, v_t, ot_spr)
 
 func _ready():
 	self.add_child(wysar)
