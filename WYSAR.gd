@@ -5,7 +5,6 @@ class_name WYSAR
 var enable: bool = true
 
 var wc = preload("res://WYSAR_Character.gd")
-var os = preload("res://other_sprite.gd")
 
 var current_file: File = File.new()
 var current_file_path: String = ""
