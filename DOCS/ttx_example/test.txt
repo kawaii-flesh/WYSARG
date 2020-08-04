@@ -1,0 +1,6 @@
+@vars
+var1 = "Value"
+msg = "Hello, World!"
+@end
+Print msg -> <msg>;
+Just var1 = <var1>;

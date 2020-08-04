@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+import sys
+
+def vars_sec(st, vt):
+    print("Use vars")
+    vars = vt.split('\n')
+    vkv = {}
+    for i in vars:
+        lb = i.split('=')
+        k = lb[0]
+        v = lb[1]
+        k = k[k.find('<')+1:k.rfind('>')]
+        v = v[v.find('"')+1:v.rfind('"')]
+        vkv[k] = v
+    for key, val in vkv.items():
+        st = st.replace('<'+key+'>', val)
+    return st
+
+if(len(sys.argv)<2):
+    print("ttx [text_file]")
+    exit(0)
+tf = open(sys.argv[1], 'r')
+of = open('ttx_' + sys.argv[1], 'wb')
+text = tf.read()
+if(text[:5] == '@vars'):
+    ps = text.find('@end')
+    if(ps == -1):
+        print("Error: can't find '@end'")
+        exit()
+    vars = text[text.find('@vars') + 6:text.find('@end') - 1]
+    text = text[ps+5:]
+    text = vars_sec(text, vars)
+    of.write(text.encode('utf-8'))
+else:
+    of.write(text.encode('utf-8'))
+
+tf.close()
+of.close()
+
+#@vars
+#<test> = "Text"
+#<var2> = "Hello, World"
+#@end
+#Use test: <test>
+#Use var2: <vat2>

@@ -1,0 +1,2 @@
+Print msg -> Hello, World!;
+Just var1 = Value;
